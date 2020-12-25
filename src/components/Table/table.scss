@@ -31,6 +31,16 @@
         background: #660000;
       }
     }
+
+    &.visit {
+      .cell {
+        background: #ff9898;
+      }
+    }
+  }
+
+  .mt-3 {
+    margin-top: 3rem;
   }
 
 }

@@ -2,22 +2,19 @@ import * as React from 'react';
 import { useState } from 'react';
 import './table.scss';
 import isEqual from 'lodash/isEqual';
+import { cell, coordinate } from "../../App";
 
 type Props = {
-  row: number;
-  col: number;
-  start: { x: number, y: number };
-  end: { x: number, y: number };
-  onChange: (row: number, col: number, value: number) => void;
+  start: coordinate;
+  tile: cell[][],
+  end: coordinate;
+  onChange: (row: number, col: number, wall: number) => void;
 };
 export const Table = (props: Props) => {
 
-  const { row, col, start, end, onChange } = props;
-  const [current, setCurrent] = useState<{ row: number, col: number }>({ row, col });
+  const { tile, start, end, onChange } = props;
+  const [current, setCurrent] = useState<{ row: number, col: number }>({ row: 0, col: 0 });
   const [active, setActive] = useState<boolean>(false);
-
-  const rows = Array.from(Array(row));
-  const cols = Array.from(Array(col));
 
   const transition = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const { row, col } = getRowCol(event);
@@ -50,21 +47,30 @@ export const Table = (props: Props) => {
     }
   }
 
+  const fixed = (rIndex: number, cIndex: number) => {
+    return (rIndex === start.y && cIndex === start.x) || (rIndex === end.y && cIndex === end.x);
+  }
+
   return (
       <div className="root">
-        {rows.map((r, ri) => (
-            <div key={ri} className="row">
-              {cols.map((c, ci) =>
-                  (<div key={ci}
-                        data-id={String(ri * 100 + ci)}
-                        className={`col ${(ri == start.y && ci == start.x) || (ri == end.y && ci == end.x) ? 'fixed' : ''}`}
-                        onMouseDown={onMouseDown}
-                        onMouseMove={onMouseMove}
-                        onMouseUp={() => setActive(false)}
-                  >
-                    <div className="cell"></div>
-                  </div>))}
-            </div>))}
+        {
+          tile.map((row, rIndex) => (
+              <div key={rIndex} className="row">
+                {
+                  row.map((col, cIndex) => (
+                      <div key={cIndex}
+                           data-id={String(rIndex * 100 + cIndex)}
+                           className={`col ${fixed(rIndex, cIndex) ? 'fixed' : ''} ${col.visit ? 'visit': ''}`}
+                           onMouseDown={onMouseDown}
+                           onMouseMove={onMouseMove}
+                           onMouseUp={() => setActive(false)}
+                      >
+                        <div className="cell"></div>
+                      </div>))
+                }
+              </div>
+          ))
+        }
       </div>
   );
 };
